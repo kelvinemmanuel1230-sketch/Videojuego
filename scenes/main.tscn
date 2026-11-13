@@ -1,0 +1,141 @@
+[gd_scene format=4 uid="uid://bgtsu3kyrdo5o"]
+
+[ext_resource type="Script" uid="uid://cjg31662rudhk" path="res://scripts/game.gd" id="1_game"]
+[ext_resource type="PackedScene" uid="uid://4tmge11mf3ef" path="res://scenes/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/collectible.tscn" id="3_collectible"]
+[ext_resource type="Texture2D" uid="uid://bgc8agsolhucv" path="res://assets/generated/dirt_tile.png" id="3_o6xl0"]
+[ext_resource type="Texture2D" uid="uid://800i8tf5p3wl" path="res://assets/generated/bg_hills.png" id="4_bg"]
+[ext_resource type="Texture2D" uid="uid://uf3q7wvwdsbr" path="res://assets/generated/grass_surface.png" id="4_tipki"]
+[ext_resource type="Script" uid="uid://bcoxr8rvw4tea" path="res://scripts/collectible.gd" id="5_tipki"]
+[ext_resource type="PackedScene" path="res://scenes/spider.tscn" id="6_spider"]
+[ext_resource type="Script" uid="uid://beyi2len5s27i" path="res://scripts/player.gd" id="7_85g3d"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_choun"]
+texture = ExtResource("3_o6xl0")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+1:0/0 = 0
+1:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+0:1/0 = 0
+0:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+1:1/0 = 0
+1:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+
+[sub_resource type="TileSet" id="TileSet_ya4ey"]
+tile_size = Vector2i(64, 64)
+physics_layer_0/collision_layer = 1
+sources/0 = SubResource("TileSetAtlasSource_choun")
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_85g3d"]
+texture = ExtResource("4_tipki")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_choun"]
+tile_size = Vector2i(64, 64)
+sources/0 = SubResource("TileSetAtlasSource_85g3d")
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_death"]
+size = Vector2(3200, 220)
+
+[node name="Main" type="Node2D" unique_id=2054964084]
+script = ExtResource("1_game")
+
+[node name="ParallaxBackground" type="ParallaxBackground" parent="." unique_id=208366061]
+
+[node name="ParallaxLayer" type="ParallaxLayer" parent="ParallaxBackground" unique_id=1515511502]
+motion_scale = Vector2(0.25, 0.1)
+motion_mirroring = Vector2(2560, 0)
+
+[node name="Background" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer" unique_id=178949347]
+scale = Vector2(2, 2)
+texture = ExtResource("4_bg")
+centered = false
+
+[node name="Ground" type="TileMapLayer" parent="." unique_id=1849560551]
+tile_map_data = PackedByteArray("AAD6/wkAAAAAAAAAAAD7/wkAAAAAAAAAAAD8/wkAAAAAAAAAAAD9/wkAAAAAAAAAAAD+/wkAAAAAAAAAAAD//wkAAAAAAAAAAAAAAAkAAAAAAAAAAAABAAkAAAAAAAAAAAACAAkAAAAAAAAAAAADAAkAAAAAAAAAAAAEAAkAAAAAAAAAAAAFAAkAAAAAAAAAAAAGAAkAAAAAAAAAAAAHAAkAAAAAAAAAAAAIAAkAAAAAAAAAAAAJAAkAAAAAAAAAAAAKAAkAAAAAAAAAAAALAAkAAAAAAAAAAAAMAAkA//////////8NAAkA//////////8OAAkAAAAAAAAAAAAPAAkAAAAAAAAAAAAQAAkAAAAAAAAAAAARAAkAAAAAAAAAAAASAAkAAAAAAAAAAAATAAkAAAAAAAAAAAAUAAkAAAAAAAAAAAAVAAkAAAAAAAAAAAAWAAkAAAAAAAAAAAAXAAkAAAAAAAAAAAAYAAkAAAAAAAAAAAAZAAkAAAAAAAAAAAD6/woAAAAAAAAAAAD7/woAAAAAAAAAAAD8/woAAAAAAAAAAAD9/woAAAAAAAAAAAD+/woAAAAAAAAAAAD//woAAAAAAAAAAAAAAAoAAAAAAAAAAAABAAoAAAAAAAAAAAACAAoAAAAAAAAAAAADAAoAAAAAAAAAAAAEAAoAAAAAAAAAAAAFAAoAAAAAAAAAAAAGAAoAAAAAAAAAAAAHAAoAAAAAAAAAAAAIAAoAAAAAAAAAAAAJAAoAAAAAAAAAAAAKAAoAAAAAAAAAAAALAAoAAAAAAAAAAAAMAAoA//////////8NAAoA//////////8OAAoAAAAAAAAAAAAPAAoAAAAAAAAAAAAQAAoAAAAAAAAAAAARAAoAAAAAAAAAAAASAAoAAAAAAAAAAAATAAoAAAAAAAAAAAAUAAoAAAAAAAAAAAAVAAoAAAAAAAAAAAAWAAoAAAAAAAAAAAAXAAoAAAAAAAAAAAAYAAoAAAAAAAAAAAAZAAoAAAAAAAAAAAD6/wsAAAAAAAAAAAD7/wsAAAAAAAAAAAD8/wsAAAAAAAAAAAD9/wsAAAAAAAAAAAD+/wsAAAAAAAAAAAD//wsAAAAAAAAAAAAAAAsAAAAAAAAAAAABAAsAAAAAAAAAAAACAAsAAAAAAAAAAAADAAsAAAAAAAAAAAAEAAsAAAAAAAAAAAAFAAsAAAAAAAAAAAAGAAsAAAAAAAAAAAAHAAsAAAAAAAAAAAAIAAsAAAAAAAAAAAAJAAsAAAAAAAAAAAAKAAsAAAAAAAAAAAALAAsAAAAAAAAAAAAMAAsA//////////8NAAsA//////////8OAAsAAAAAAAAAAAAPAAsAAAAAAAAAAAAQAAsAAAAAAAAAAAARAAsAAAAAAAAAAAASAAsAAAAAAAAAAAATAAsAAAAAAAAAAAAUAAsAAAAAAAAAAAAVAAsAAAAAAAAAAAAWAAsAAAAAAAAAAAAXAAsAAAAAAAAAAAAYAAsAAAAAAAAAAAAZAAsAAAAAAAAAAAD6/wwAAAAAAAAAAAD7/wwAAAAAAAAAAAD8/wwAAAAAAAAAAAD9/wwAAAAAAAAAAAD+/wwAAAAAAAAAAAD//wwAAAAAAAAAAAAAAAwAAAAAAAAAAAABAAwAAAAAAAAAAAACAAwAAAAAAAAAAAADAAwAAAAAAAAAAAAEAAwAAAAAAAAAAAAFAAwAAAAAAAAAAAAGAAwAAAAAAAAAAAAHAAwAAAAAAAAAAAAIAAwAAAAAAAAAAAAJAAwAAAAAAAAAAAAKAAwAAAAAAAAAAAALAAwAAAAAAAAAAAAMAAwA//////////8NAAwA//////////8OAAwAAAAAAAAAAAAPAAwAAAAAAAAAAAAQAAwAAAAAAAAAAAARAAwAAAAAAAAAAAASAAwAAAAAAAAAAAATAAwAAAAAAAAAAAAUAAwAAAAAAAAAAAAVAAwAAAAAAAAAAAAWAAwAAAAAAAAAAAAXAAwAAAAAAAAAAAAYAAwAAAAAAAAAAAAZAAwAAAAAAAAAAAD6/w0AAAAAAAAAAAD7/w0AAAAAAAAAAAD8/w0AAAAAAAAAAAD9/w0AAAAAAAAAAAD+/w0AAAAAAAAAAAD//w0AAAAAAAAAAAAAAA0AAAAAAAAAAAABAA0AAAAAAAAAAAACAA0AAAAAAAAAAAADAA0AAAAAAAAAAAAEAA0AAAAAAAAAAAAFAA0AAAAAAAAAAAAGAA0AAAAAAAAAAAAHAA0AAAAAAAAAAAAIAA0AAAAAAAAAAAAJAA0AAAAAAAAAAAAKAA0AAAAAAAAAAAALAA0AAAAAAAAAAAAMAA0A//////////8NAA0A//////////8OAA0AAAAAAAAAAAAPAA0AAAAAAAAAAAAQAA0AAAAAAAAAAAARAA0AAAAAAAAAAAASAA0AAAAAAAAAAAATAA0AAAAAAAAAAAAUAA0AAAAAAAAAAAAVAA0AAAAAAAAAAAAWAA0AAAAAAAAAAAAXAA0AAAAAAAAAAAAYAA0AAAAAAAAAAAAZAA0AAAAAAAAAAAADAAYAAAAAAAAAAAAEAAYAAAAAAAAAAAAFAAYAAAAAAAAAAAAGAAYAAAAAAAAAAAAKAAQAAAAAAAAAAAALAAQA//////////8MAAQA//////////8NAAQA//////////8QAAYAAAAAAAAAAAARAAYAAAAAAAAAAAASAAYAAAAAAAAAAAATAAYA//////////8TAAIAAAAAAAAAAAATAAMAAAAAAAAAAAATAAQAAAAAAAAAAAATAAUAAAAAAAAAAAATAAcA//////////8TAAgA//////////8WAAIAAAAAAAAAAAAWAAMAAAAAAAAAAAAWAAQAAAAAAAAAAAAWAAUAAAAAAAAAAAAWAAYAAAAAAAAAAAAWAAcAAAAAAAAAAAAWAAgAAAAAAAAAAAADAAcA//////////8EAAcA//////////8FAAcA//////////8GAAcA//////////8JAAUA//////////8KAAUA//////////8LAAUA//////////8QAAcA//////////8RAAcA//////////8SAAcA//////////8JAAQAAAAAAAAAAAAIAAQAAAAAAAAAAAA=")
+tile_set = SubResource("TileSet_ya4ey")
+
+[node name="Grass" type="TileMapLayer" parent="." unique_id=1140495329]
+tile_map_data = PackedByteArray("AAD6/wkAAAAAAAAAAAD7/wkAAAAAAAAAAAD8/wkAAAAAAAAAAAD9/wkAAAAAAAAAAAD+/wkAAAAAAAAAAAD//wkAAAAAAAAAAAAAAAkAAAAAAAAAAAABAAkAAAAAAAAAAAACAAkAAAAAAAAAAAADAAkAAAAAAAAAAAAEAAkAAAAAAAAAAAAFAAkAAAAAAAAAAAAGAAkAAAAAAAAAAAAHAAkAAAAAAAAAAAAIAAkAAAAAAAAAAAAJAAkAAAAAAAAAAAAKAAkAAAAAAAAAAAALAAkAAAAAAAAAAAAOAAkAAAAAAAAAAAAPAAkAAAAAAAAAAAAQAAkAAAAAAAAAAAARAAkAAAAAAAAAAAASAAkAAAAAAAAAAAATAAkAAAAAAAAAAAAUAAkAAAAAAAAAAAAVAAkAAAAAAAAAAAAWAAkAAAAAAAAAAAAXAAkAAAAAAAAAAAAYAAkAAAAAAAAAAAAZAAkAAAAAAAAAAAADAAYAAAAAAAAAAAAEAAYAAAAAAAAAAAAFAAYAAAAAAAAAAAAGAAYAAAAAAAAAAAAKAAQAAAAAAAAAAAALAAQA//////////8MAAQA//////////8NAAQA//////////8QAAYAAAAAAAAAAAARAAYAAAAAAAAAAAASAAYAAAAAAAAAAAATAAYA//////////8TAAIAAAAAAAAAAAAWAAIAAAAAAAAAAAADAAcA//////////8EAAcA//////////8FAAcA//////////8GAAcA//////////8JAAUA//////////8KAAUA//////////8LAAUA//////////8QAAcA//////////8RAAcA//////////8SAAcA//////////8JAAQAAAAAAAAAAAAIAAQAAAAAAAAAAAA=")
+tile_set = SubResource("TileSet_choun")
+
+[node name="DeathZone" type="Area2D" parent="." unique_id=518925311]
+position = Vector2(600, 880)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DeathZone" unique_id=443797582]
+shape = SubResource("RectangleShape2D_death")
+
+[node name="Collectibles" type="Node2D" parent="." unique_id=984532753]
+
+[node name="Collectible1" type="Area2D" parent="Collectibles" unique_id=1090814990 instance=ExtResource("3_collectible")]
+position = Vector2(140, 500)
+script = ExtResource("5_tipki")
+
+[node name="Collectible2" type="Area2D" parent="Collectibles" unique_id=654370714 instance=ExtResource("3_collectible")]
+position = Vector2(320, 320)
+script = ExtResource("5_tipki")
+
+[node name="Collectible3" type="Area2D" parent="Collectibles" unique_id=1627590669 instance=ExtResource("3_collectible")]
+position = Vector2(560, 500)
+script = ExtResource("5_tipki")
+
+[node name="Collectible4" type="Area2D" parent="Collectibles" unique_id=100300135 instance=ExtResource("3_collectible")]
+position = Vector2(670, 190)
+script = ExtResource("5_tipki")
+
+[node name="Collectible5" type="Area2D" parent="Collectibles" unique_id=189620176 instance=ExtResource("3_collectible")]
+position = Vector2(1000, 500)
+script = ExtResource("5_tipki")
+
+[node name="Collectible6" type="Area2D" parent="Collectibles" unique_id=1804326715 instance=ExtResource("3_collectible")]
+position = Vector2(1120, 320)
+script = ExtResource("5_tipki")
+
+[node name="Collectible7" type="Area2D" parent="Collectibles" unique_id=1453195858 instance=ExtResource("3_collectible")]
+position = Vector2(1344, 220)
+script = ExtResource("5_tipki")
+
+[node name="Collectible8" type="Area2D" parent="Collectibles" unique_id=1577585632 instance=ExtResource("3_collectible")]
+position = Vector2(1560, 500)
+script = ExtResource("5_tipki")
+
+[node name="Enemies" type="Node2D" parent="."]
+
+[node name="Spider1" type="CharacterBody2D" parent="Enemies" instance=ExtResource("6_spider")]
+position = Vector2(60, 540)
+
+[node name="Spider2" type="CharacterBody2D" parent="Enemies" instance=ExtResource("6_spider")]
+position = Vector2(256, 340)
+
+[node name="Spider3" type="CharacterBody2D" parent="Enemies" instance=ExtResource("6_spider")]
+position = Vector2(1120, 340)
+
+[node name="Player" type="CharacterBody2D" parent="." unique_id=541257451 instance=ExtResource("2_player")]
+position = Vector2(-120, 460)
+script = ExtResource("7_85g3d")
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=1275163179]
+
+[node name="StatusLabel" type="Label" parent="HUD" unique_id=874692223]
+offset_left = 24.0
+offset_top = 16.0
+offset_right = 600.0
+offset_bottom = 58.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 30
+text = "Swirlies: 0 / 0"
+
+[node name="ControlsLabel" type="Label" parent="HUD" unique_id=443865311]
+offset_left = 24.0
+offset_top = 62.0
+offset_right = 800.0
+offset_bottom = 96.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 20
+text = "← → correr    ESPACIO saltar    SHIFT rodar    salta en la pared    R reiniciar"
