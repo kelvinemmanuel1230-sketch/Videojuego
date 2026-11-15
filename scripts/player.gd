@@ -6,6 +6,8 @@ extends CharacterBody2D
 
 signal landed
 signal spin_started
+signal health_changed(current: int, maximum: int)
+signal died
 
 # --- Horizontal movement ----------------------------------------------------
 const MAX_SPEED: float = 330.0
@@ -36,6 +38,15 @@ const SPIN_COOLDOWN: float = 0.45
 const SPIN_ROTATION_SPEED: float = 18.0
 
 const RUN_ANIMATION: StringName = &"run"
+const JUMP_ANIMATION: StringName = &"jump"
+const FALL_ANIMATION: StringName = &"fall"
+
+# --- Health -----------------------------------------------------------------
+const MAX_HEALTH: int = 5
+const INVULN_TIME: float = 1.2
+
+## Half of the collision box height; springs and enemies compare it with the feet.
+const HALF_HEIGHT: float = 43.0
 
 @onready var _sprite: AnimatedSprite2D = $AnimatedSprite2D
 
@@ -48,6 +59,9 @@ var _facing: int = 1
 var _was_on_floor: bool = true
 var _idle_time: float = 0.0
 var _invuln: float = 0.0
+var _health: int = MAX_HEALTH
+var _dead: bool = false
+var _no_cut: float = 0.0
 
 
 func _ready() -> void:
@@ -56,6 +70,8 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if _dead:
+		return
 	_tick_timers(delta)
 
 	var on_floor: bool = is_on_floor()
@@ -100,6 +116,7 @@ func _tick_timers(delta: float) -> void:
 	_wall_stick = maxf(_wall_stick - delta, 0.0)
 	_spin_cd = maxf(_spin_cd - delta, 0.0)
 	_invuln = maxf(_invuln - delta, 0.0)
+	_no_cut = maxf(_no_cut - delta, 0.0)
 	if _spin_time > 0.0:
 		_spin_time = maxf(_spin_time - delta, 0.0)
 
@@ -153,6 +170,8 @@ func _try_jump() -> void:
 
 
 func _cut_jump() -> void:
+	if _no_cut > 0.0:
+		return
 	if Input.is_action_just_released("jump") and velocity.y < 0.0:
 		velocity.y *= JUMP_CUT
 
@@ -174,18 +193,62 @@ func bounce(force: float) -> void:
 	velocity.y = -force
 	_coyote = 0.0
 	_spin_time = 0.0
+	_no_cut = 0.3
+
+
+func get_half_height() -> float:
+	return HALF_HEIGHT
 
 
 func hurt(from_position: Vector2) -> void:
-	if _invuln > 0.0:
+	if _dead or _invuln > 0.0 or _spin_time > 0.0:
 		return
-	_invuln = 1.2
+	_invuln = INVULN_TIME
 	_wall_stick = 0.0
 	var away: float = signf(global_position.x - from_position.x)
 	if is_zero_approx(away):
 		away = -1.0
 	velocity.x = away * 260.0
 	velocity.y = -340.0
+	_health = maxi(_health - 1, 0)
+	health_changed.emit(_health, MAX_HEALTH)
+	if _health <= 0:
+		die()
+
+
+func heal(amount: int) -> void:
+	if _dead or _health >= MAX_HEALTH:
+		return
+	_health = mini(_health + amount, MAX_HEALTH)
+	health_changed.emit(_health, MAX_HEALTH)
+
+
+func get_health() -> int:
+	return _health
+
+
+func get_max_health() -> int:
+	return MAX_HEALTH
+
+
+func is_spinning() -> bool:
+	return _spin_time > 0.0
+
+
+func is_dead() -> bool:
+	return _dead
+
+
+func die() -> void:
+	if _dead:
+		return
+	_dead = true
+	velocity = Vector2.ZERO
+	set_physics_process(false)
+	died.emit()
+	var tween: Tween = create_tween().set_parallel(true)
+	tween.tween_property(_sprite, "rotation", 1.6, 0.35)
+	tween.tween_property(_sprite, "modulate:a", 0.25, 0.7)
 
 
 func _update_visuals(now_floor: bool, delta: float) -> void:
@@ -197,22 +260,29 @@ func _update_visuals(now_floor: bool, delta: float) -> void:
 		return
 
 	_sprite.rotation = 0.0
+	_sprite.position.y = 0.0
 
 	if not now_floor:
-		_sprite.stop()
-		_sprite.frame = 2
-		_sprite.position.y = 0.0
+		_set_animation(JUMP_ANIMATION if velocity.y < 0.0 else FALL_ANIMATION)
 		return
 
 	var speed: float = absf(velocity.x)
 	if speed > 25.0:
 		_idle_time = 0.0
-		_sprite.position.y = 0.0
 		_sprite.speed_scale = clampf(speed / MAX_SPEED, 0.55, 1.7)
-		if not _sprite.is_playing():
-			_sprite.play(RUN_ANIMATION)
+		_set_animation(RUN_ANIMATION)
 	else:
-		_sprite.stop()
-		_sprite.frame = 0
 		_idle_time += delta
 		_sprite.position.y = sin(_idle_time * 4.0) * 2.0
+		if _sprite.animation != RUN_ANIMATION:
+			_sprite.animation = RUN_ANIMATION
+		_sprite.stop()
+		_sprite.frame = 0
+
+
+func _set_animation(animation: StringName) -> void:
+	if not _sprite.sprite_frames or not _sprite.sprite_frames.has_animation(animation):
+		return
+	if _sprite.animation == animation and _sprite.is_playing():
+		return
+	_sprite.play(animation)

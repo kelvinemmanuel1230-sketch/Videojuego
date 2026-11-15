@@ -2,20 +2,21 @@
 
 [ext_resource type="Script" uid="uid://b0tfggmqpkhk4" path="res://scripts/spider.gd" id="1_spider"]
 [ext_resource type="Texture2D" uid="uid://dccyflbs6afwb" path="res://assets/generated/spider_walk.png" id="2_algeo"]
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_k5hg5"]
-atlas = ExtResource("2_algeo")
-region = Rect2(0, 0, 128, 128)
+[ext_resource type="Texture2D" uid="uid://cdu52rq5hjevd" path="res://assets/generated/spider_stunned.png" id="2_k5hg5"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_d613k"]
 atlas = ExtResource("2_algeo")
-region = Rect2(128, 0, 128, 128)
+region = Rect2(0, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_evcmw"]
 atlas = ExtResource("2_algeo")
-region = Rect2(256, 0, 128, 128)
+region = Rect2(128, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_txxy0"]
+atlas = ExtResource("2_algeo")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wdplg"]
 atlas = ExtResource("2_algeo")
 region = Rect2(384, 0, 128, 128)
 
@@ -23,8 +24,13 @@ region = Rect2(384, 0, 128, 128)
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_k5hg5")
+"texture": ExtResource("2_k5hg5")
+}],
+"loop": 0,
+"name": &"stunned",
+"speed": 5.0
 }, {
+"frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_d613k")
 }, {
@@ -33,6 +39,9 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_txxy0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wdplg")
 }],
 "loop": 1,
 "name": &"walk",
