@@ -203,7 +203,7 @@ animations = [{
 }],
 "loop": 1,
 "name": &"fall",
-"speed": 15.0
+"speed": 10.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -234,7 +234,7 @@ animations = [{
 }],
 "loop": 1,
 "name": &"jump",
-"speed": 15.0
+"speed": 10.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -248,7 +248,7 @@ animations = [{
 }],
 "loop": 1,
 "name": &"land",
-"speed": 15.0
+"speed": 10.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -293,12 +293,12 @@ size = Vector2(38, 86)
 script = ExtResource("1_player")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=743894229]
-position = Vector2(12.5, -2)
-scale = Vector2(1.5703125, 1.3870968)
+position = Vector2(6.5000057, -2)
+scale = Vector2(1.2734375, 1.3870968)
 sprite_frames = SubResource("SpriteFrames_ur7pv")
-animation = &"dash"
+animation = &"jump"
 autoplay = "run"
-frame_progress = 0.6957635
+frame_progress = 0.8245259
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=288351688]
 shape = SubResource("RectangleShape2D_body")

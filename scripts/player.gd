@@ -276,14 +276,27 @@ func _update_visuals(now_floor: bool, _delta: float) -> void:
 	_sprite.position.y = 0.0
 
 	if not now_floor:
-		_set_animation(JUMP_ANIMATION if velocity.y < 0.0 else FALL_ANIMATION)
+		# Transición: al empezar a bajar (desde jump) reproducir land una vez, luego fall
+		if velocity.y < 0.0:
+			_set_animation(JUMP_ANIMATION)
+		else:
+			if _sprite.animation == JUMP_ANIMATION:
+				if _sprite.sprite_frames and _sprite.sprite_frames.has_animation(LAND_ANIMATION):
+					_set_animation(LAND_ANIMATION)
+				else:
+					_set_animation(FALL_ANIMATION)
+			elif _sprite.animation == LAND_ANIMATION:
+				if not _sprite.is_playing():
+					_set_animation(FALL_ANIMATION)
+			elif _sprite.animation == FALL_ANIMATION:
+				pass
+			else:
+				_set_animation(FALL_ANIMATION)
 		return
 
-	# Play land animation when landing from a jump
-	if now_floor and _was_in_air:
-		_set_animation(LAND_ANIMATION)
+	if _was_in_air:
 		_was_in_air = false
-		return
+		# Plan recomendado: al tocar suelo ir directo a run/idle (sin land de aterrizaje)
 
 	var speed: float = absf(velocity.x)
 	if speed > 25.0:
@@ -291,12 +304,8 @@ func _update_visuals(now_floor: bool, _delta: float) -> void:
 		_sprite.speed_scale = clampf(speed / MAX_SPEED, 0.55, 1.7)
 		_set_animation(RUN_ANIMATION)
 	else:
-
-		# Play idle animation when on floor and not moving
-		# Deja que la animación idle reproduzca los 28 frames naturales
 		if _sprite.animation != IDLE_ANIMATION:
 			_set_animation(IDLE_ANIMATION)
-		# No detenemos el sprite ni ponemos frame=0 para que juegue completa
 
 
 func _set_animation(animation: StringName) -> void:
