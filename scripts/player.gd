@@ -31,15 +31,16 @@ const WALL_JUMP_PUSH: float = 430.0
 const WALL_JUMP_UP: float = -820.0
 const WALL_STICK_TIME: float = 0.14
 
-# --- Spin (roll / dive) -----------------------------------------------------
-const SPIN_SPEED: float = 650.0
+# --- Dash -----------------------------------------------------
+const SPIN_SPEED: float = 300
 const SPIN_DURATION: float = 0.32
-const SPIN_COOLDOWN: float = 0.45
-const SPIN_ROTATION_SPEED: float = 18.0
+const SPIN_COOLDOWN: float = 0.50
 
 const RUN_ANIMATION: StringName = &"run"
 const JUMP_ANIMATION: StringName = &"jump"
 const FALL_ANIMATION: StringName = &"fall"
+const LAND_ANIMATION: StringName = &"land"
+const IDLE_ANIMATION: StringName = &"idle"
 
 # --- Health -----------------------------------------------------------------
 const MAX_HEALTH: int = 5
@@ -55,8 +56,10 @@ var _buffer: float = 0.0
 var _wall_stick: float = 0.0
 var _spin_time: float = 0.0
 var _spin_cd: float = 0.0
+var _dash_time: float = 0.0
 var _facing: int = 1
 var _was_on_floor: bool = true
+var _was_in_air: bool = false
 var _idle_time: float = 0.0
 var _invuln: float = 0.0
 var _health: int = MAX_HEALTH
@@ -87,8 +90,8 @@ func _physics_process(delta: float) -> void:
 	if not is_zero_approx(dir):
 		_facing = int(signf(dir))
 
-	if _spin_time > 0.0:
-		_do_spin(delta)
+	if _dash_time > 0.0:
+		_apply_dash(delta)
 	else:
 		_apply_gravity(delta, dir, on_wall, on_floor, wall_normal)
 		_apply_horizontal(dir, on_floor, delta)
@@ -103,6 +106,7 @@ func _physics_process(delta: float) -> void:
 	var now_floor: bool = is_on_floor()
 	if now_floor and not _was_on_floor:
 		landed.emit()
+		_was_in_air = true
 	_was_on_floor = now_floor
 
 	_update_visuals(now_floor, delta)
@@ -117,12 +121,20 @@ func _tick_timers(delta: float) -> void:
 	_spin_cd = maxf(_spin_cd - delta, 0.0)
 	_invuln = maxf(_invuln - delta, 0.0)
 	_no_cut = maxf(_no_cut - delta, 0.0)
+	if _dash_time > 0.0:
+		_dash_time = maxf(_dash_time - delta, 0.0)
 	if _spin_time > 0.0:
 		_spin_time = maxf(_spin_time - delta, 0.0)
 
 
 func _do_spin(delta: float) -> void:
 	velocity.x = float(_facing) * SPIN_SPEED
+	if not is_on_floor():
+		velocity.y = move_toward(velocity.y, 0.0, 1400.0 * delta)
+
+
+func _apply_dash(delta: float) -> void:
+	velocity.x = float(_facing) * SPIN_SPEED * 2.0
 	if not is_on_floor():
 		velocity.y = move_toward(velocity.y, 0.0, 1400.0 * delta)
 
@@ -181,7 +193,7 @@ func _try_spin(dir: float, on_floor: bool) -> void:
 		return
 	if not is_zero_approx(dir):
 		_facing = int(signf(dir))
-	_spin_time = SPIN_DURATION
+	_dash_time = SPIN_DURATION
 	_spin_cd = SPIN_COOLDOWN
 	velocity.x = float(_facing) * SPIN_SPEED
 	if not on_floor:
@@ -232,7 +244,7 @@ func get_max_health() -> int:
 
 
 func is_spinning() -> bool:
-	return _spin_time > 0.0
+	return _spin_time > 0.0 or _dash_time > 0.0
 
 
 func is_dead() -> bool:
@@ -251,12 +263,13 @@ func die() -> void:
 	tween.tween_property(_sprite, "modulate:a", 0.25, 0.7)
 
 
-func _update_visuals(now_floor: bool, delta: float) -> void:
+func _update_visuals(now_floor: bool, _delta: float) -> void:
 	_sprite.flip_h = _facing < 0
 	_sprite.modulate.a = 0.35 if _invuln > 0.0 and int(_invuln * 14.0) % 2 == 0 else 1.0
 
-	if _spin_time > 0.0:
-		_sprite.rotation -= SPIN_ROTATION_SPEED * delta * float(_facing)
+	if _dash_time > 0.0:
+		if _sprite.animation != &"dash":
+			_sprite.play(&"dash")
 		return
 
 	_sprite.rotation = 0.0
@@ -266,18 +279,24 @@ func _update_visuals(now_floor: bool, delta: float) -> void:
 		_set_animation(JUMP_ANIMATION if velocity.y < 0.0 else FALL_ANIMATION)
 		return
 
+	# Play land animation when landing from a jump
+	if now_floor and _was_in_air:
+		_set_animation(LAND_ANIMATION)
+		_was_in_air = false
+		return
+
 	var speed: float = absf(velocity.x)
 	if speed > 25.0:
 		_idle_time = 0.0
 		_sprite.speed_scale = clampf(speed / MAX_SPEED, 0.55, 1.7)
 		_set_animation(RUN_ANIMATION)
 	else:
-		_idle_time += delta
-		_sprite.position.y = sin(_idle_time * 4.0) * 2.0
-		if _sprite.animation != RUN_ANIMATION:
-			_sprite.animation = RUN_ANIMATION
-		_sprite.stop()
-		_sprite.frame = 0
+
+		# Play idle animation when on floor and not moving
+		# Deja que la animación idle reproduzca los 28 frames naturales
+		if _sprite.animation != IDLE_ANIMATION:
+			_set_animation(IDLE_ANIMATION)
+		# No detenemos el sprite ni ponemos frame=0 para que juegue completa
 
 
 func _set_animation(animation: StringName) -> void:
