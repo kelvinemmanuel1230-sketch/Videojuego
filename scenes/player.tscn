@@ -296,9 +296,9 @@ script = ExtResource("1_player")
 position = Vector2(6.5000057, -2)
 scale = Vector2(1.2734375, 1.3870968)
 sprite_frames = SubResource("SpriteFrames_ur7pv")
-animation = &"jump"
+animation = &"dash"
 autoplay = "run"
-frame_progress = 0.8245259
+frame_progress = 0.6301484
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=288351688]
 shape = SubResource("RectangleShape2D_body")
