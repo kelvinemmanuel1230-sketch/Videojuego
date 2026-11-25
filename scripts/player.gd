@@ -2,7 +2,7 @@ class_name Player
 extends CharacterBody2D
 
 ## Momentum-based platformer controller inspired by Fancy Pants Adventures:
-## run with inertia, variable-height jumps, wall slide / wall jump and a spin roll.
+## run with inertia, variable-height jumps and a spin roll.
 
 signal landed
 signal spin_started
@@ -25,22 +25,20 @@ const JUMP_CUT: float = 0.45
 const COYOTE_TIME: float = 0.1
 const JUMP_BUFFER_TIME: float = 0.12
 
-# --- Wall interaction -------------------------------------------------------
-const WALL_SLIDE_SPEED: float = 130.0
-const WALL_JUMP_PUSH: float = 430.0
-const WALL_JUMP_UP: float = -820.0
-const WALL_STICK_TIME: float = 0.14
-
 # --- Dash -----------------------------------------------------
 const SPIN_SPEED: float = 300
 const SPIN_DURATION: float = 0.32
 const SPIN_COOLDOWN: float = 0.50
 
 const RUN_ANIMATION: StringName = &"run"
+const START_JUMP_ANIMATION: StringName = &"start-jump"
 const JUMP_ANIMATION: StringName = &"jump"
 const FALL_ANIMATION: StringName = &"fall"
 const LAND_ANIMATION: StringName = &"land"
 const IDLE_ANIMATION: StringName = &"idle"
+const HIT_1_ANIMATION: StringName = &"hit1"
+const HIT_2_ANIMATION: StringName = &"hit2"
+const HIT_COMBO_RESET_TIME: float = 1.0
 
 # --- Health -----------------------------------------------------------------
 const MAX_HEALTH: int = 5
@@ -53,7 +51,6 @@ const HALF_HEIGHT: float = 43.0
 
 var _coyote: float = 0.0
 var _buffer: float = 0.0
-var _wall_stick: float = 0.0
 var _spin_time: float = 0.0
 var _spin_cd: float = 0.0
 var _dash_time: float = 0.0
@@ -65,6 +62,9 @@ var _invuln: float = 0.0
 var _health: int = MAX_HEALTH
 var _dead: bool = false
 var _no_cut: float = 0.0
+var _hit_combo_step: int = 0
+var _hit_reset_timer: float = 0.0
+var _hit_anim_time: float = 0.0
 
 
 func _ready() -> void:
@@ -78,8 +78,6 @@ func _physics_process(delta: float) -> void:
 	_tick_timers(delta)
 
 	var on_floor: bool = is_on_floor()
-	var on_wall: bool = is_on_wall_only()
-	var wall_normal: Vector2 = get_wall_normal()
 
 	if on_floor:
 		_coyote = COYOTE_TIME
@@ -93,9 +91,8 @@ func _physics_process(delta: float) -> void:
 	if _dash_time > 0.0:
 		_apply_dash(delta)
 	else:
-		_apply_gravity(delta, dir, on_wall, on_floor, wall_normal)
+		_apply_gravity(delta)
 		_apply_horizontal(dir, on_floor, delta)
-		_try_wall_jump(on_wall, on_floor, wall_normal)
 		_try_jump()
 		_try_spin(dir, on_floor)
 
@@ -117,10 +114,14 @@ func _physics_process(delta: float) -> void:
 func _tick_timers(delta: float) -> void:
 	_coyote = maxf(_coyote - delta, 0.0)
 	_buffer = maxf(_buffer - delta, 0.0)
-	_wall_stick = maxf(_wall_stick - delta, 0.0)
 	_spin_cd = maxf(_spin_cd - delta, 0.0)
-	_invuln = maxf(_invuln - delta, 0.0)
+	_invuln = 0.0
 	_no_cut = maxf(_no_cut - delta, 0.0)
+	_hit_anim_time = maxf(_hit_anim_time - delta, 0.0)
+	if _hit_reset_timer > 0.0:
+		_hit_reset_timer = maxf(_hit_reset_timer - delta, 0.0)
+		if _hit_reset_timer <= 0.0:
+			_hit_combo_step = 0
 	if _dash_time > 0.0:
 		_dash_time = maxf(_dash_time - delta, 0.0)
 	if _spin_time > 0.0:
@@ -139,12 +140,7 @@ func _apply_dash(delta: float) -> void:
 		velocity.y = move_toward(velocity.y, 0.0, 1400.0 * delta)
 
 
-func _apply_gravity(delta: float, dir: float, on_wall: bool, on_floor: bool, wall_normal: Vector2) -> void:
-	var pushing_into_wall: bool = not is_zero_approx(dir) and dir * wall_normal.x < 0.0
-	var wall_sliding: bool = on_wall and not on_floor and velocity.y > 0.0 and _wall_stick <= 0.0 and pushing_into_wall
-	if wall_sliding:
-		velocity.y = minf(velocity.y + GRAVITY * delta, WALL_SLIDE_SPEED)
-		return
+func _apply_gravity(delta: float) -> void:
 	var g: float = GRAVITY
 	if velocity.y > 0.0:
 		g *= FALL_MULTIPLIER
@@ -158,19 +154,6 @@ func _apply_horizontal(dir: float, on_floor: bool, delta: float) -> void:
 		velocity.x = move_toward(velocity.x, dir * MAX_SPEED, accel * delta)
 	else:
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
-
-
-func _try_wall_jump(on_wall: bool, on_floor: bool, wall_normal: Vector2) -> void:
-	if not (on_wall and not on_floor and _buffer > 0.0):
-		return
-	if is_zero_approx(wall_normal.x):
-		return
-	velocity.x = wall_normal.x * WALL_JUMP_PUSH
-	velocity.y = WALL_JUMP_UP
-	_wall_stick = WALL_STICK_TIME
-	_buffer = 0.0
-	_coyote = 0.0
-	_facing = int(signf(wall_normal.x))
 
 
 func _try_jump() -> void:
@@ -213,19 +196,42 @@ func get_half_height() -> float:
 
 
 func hurt(from_position: Vector2) -> void:
-	if _dead or _invuln > 0.0 or _spin_time > 0.0:
+	if _dead or _spin_time > 0.0:
 		return
-	_invuln = INVULN_TIME
-	_wall_stick = 0.0
 	var away: float = signf(global_position.x - from_position.x)
 	if is_zero_approx(away):
 		away = -1.0
 	velocity.x = away * 260.0
 	velocity.y = -340.0
+	_play_hit_animation()
 	_health = maxi(_health - 1, 0)
 	health_changed.emit(_health, MAX_HEALTH)
 	if _health <= 0:
 		die()
+
+
+func _play_hit_animation() -> void:
+	if _hit_reset_timer <= 0.0:
+		_hit_combo_step = 0
+	var hit_anim: StringName = HIT_1_ANIMATION if _hit_combo_step == 0 else HIT_2_ANIMATION
+	_hit_combo_step = (_hit_combo_step + 1) % 2
+	_hit_reset_timer = HIT_COMBO_RESET_TIME
+	_sprite.speed_scale = 1.0
+	_sprite.rotation = 0.0
+	_sprite.position.y = 0.0
+	_sprite.play(hit_anim)
+	_hit_anim_time = _get_animation_duration(hit_anim)
+
+
+func _get_animation_duration(animation: StringName) -> float:
+	if not _sprite.sprite_frames or not _sprite.sprite_frames.has_animation(animation):
+		return 0.2
+	var frame_count: int = _sprite.sprite_frames.get_frame_count(animation)
+	var fps: float = maxf(_sprite.sprite_frames.get_animation_speed(animation), 0.001)
+	var duration: float = 0.0
+	for i in frame_count:
+		duration += _sprite.sprite_frames.get_frame_duration(animation, i) / fps
+	return maxf(duration, 0.05)
 
 
 func heal(amount: int) -> void:
@@ -265,11 +271,14 @@ func die() -> void:
 
 func _update_visuals(now_floor: bool, _delta: float) -> void:
 	_sprite.flip_h = _facing < 0
-	_sprite.modulate.a = 0.35 if _invuln > 0.0 and int(_invuln * 14.0) % 2 == 0 else 1.0
+	_sprite.modulate.a = 1.0
 
 	if _dash_time > 0.0:
 		if _sprite.animation != &"dash":
 			_sprite.play(&"dash")
+		return
+
+	if _hit_anim_time > 0.0:
 		return
 
 	_sprite.rotation = 0.0
