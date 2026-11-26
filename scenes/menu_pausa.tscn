@@ -1,0 +1,84 @@
+[gd_scene format=3 uid="uid://c7otjv07lqjcm"]
+
+[ext_resource type="Script" uid="uid://c3a27tn6ydv01" path="res://scripts/menu_pausa.gd" id="1_jhjql"]
+[ext_resource type="PackedScene" uid="uid://4o1ko2u6hiwbk" path="res://scenes/ajustes.tscn" id="2_ajustes"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d0uiw"]
+bg_color = Color(2.4065375e-06, 0.63185495, 0.64390254, 0.4627451)
+
+[node name="Menu Pausa" type="Control" unique_id=1640579394]
+process_mode = 3
+visible = false
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+script = ExtResource("1_jhjql")
+
+[node name="Panel" type="Panel" parent="." unique_id=844267772]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -576.0
+offset_top = -323.5
+offset_right = 576.0
+offset_bottom = 323.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=1784395098]
+layout_mode = 1
+anchors_preset = -1
+offset_left = -95.616005
+offset_top = -103.68001
+offset_right = 75.383995
+offset_bottom = 145.32
+theme_override_styles/panel = SubResource("StyleBoxFlat_d0uiw")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer" unique_id=2057205165]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="continue_button" type="Button" parent="PanelContainer/VBoxContainer" unique_id=684397873]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+text = "CONTINUAR"
+
+[node name="ajustes_button" type="Button" parent="PanelContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+text = "AJUSTES"
+
+[node name="reset_button" type="Button" parent="PanelContainer/VBoxContainer" unique_id=1818678485]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+text = "REINICIAR"
+
+[node name="menu_button" type="Button" parent="PanelContainer/VBoxContainer" unique_id=957772341]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+text = "MENU PRINCIPAL"
+
+[node name="exit_button" type="Button" parent="PanelContainer/VBoxContainer" unique_id=480682343]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+text = "SALIR DEL JUEGO"
+
+[node name="Ajustes" parent="." instance=ExtResource("2_ajustes")]
+visible = false
+
+[connection signal="pressed" from="PanelContainer/VBoxContainer/continue_button" to="." method="_on_continue_button_pressed"]
+[connection signal="pressed" from="PanelContainer/VBoxContainer/ajustes_button" to="." method="_on_ajustes_button_pressed"]
+[connection signal="pressed" from="PanelContainer/VBoxContainer/reset_button" to="." method="_on_reset_button_pressed"]
+[connection signal="pressed" from="PanelContainer/VBoxContainer/menu_button" to="." method="_on_menu_button_pressed"]
+[connection signal="pressed" from="PanelContainer/VBoxContainer/exit_button" to="." method="_on_exit_button_pressed"]

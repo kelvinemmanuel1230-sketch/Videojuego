@@ -675,25 +675,42 @@ animations = [{
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
 size = Vector2(8, 71)
 
-[node name="Player" type="CharacterBody2D" unique_id=34838528]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_attack"]
+size = Vector2(54, 52)
+
+[node name="Player" type="CharacterBody2D" unique_id=34838528 groups=["player"]]
 script = ExtResource("1_player")
+collision_layer = 1
+collision_mask = 3
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=743894229]
 position = Vector2(6.5000057, -2)
 scale = Vector2(1.2734375, 1.3870968)
 sprite_frames = SubResource("SpriteFrames_ur7pv")
-animation = &"idle"
+animation = &"attack4"
 autoplay = "run"
-frame_progress = 0.5640884
+frame_progress = 0.93197113
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=288351688]
 position = Vector2(0, 4.5)
 shape = SubResource("RectangleShape2D_body")
 
+[node name="AttackHitbox" type="Area2D" parent="." unique_id=571265056]
+position = Vector2(48, -2)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AttackHitbox" unique_id=935603272]
+position = Vector2(-13, 0)
+shape = SubResource("RectangleShape2D_attack")
+disabled = true
+
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1818546316]
+position = Vector2(1, 0)
 zoom = Vector2(2, 2)
 limit_left = -500
-limit_right = 5010
 position_smoothing_enabled = true
 position_smoothing_speed = 8.0
 rotation_smoothing_speed = 1.0
@@ -702,3 +719,5 @@ drag_vertical_enabled = true
 drag_top_margin = 0.3
 drag_bottom_margin = 0.3
 editor_draw_drag_margin = true
+
+[connection signal="body_entered" from="AttackHitbox" to="." method="_on_attack_hitbox_body_entered"]

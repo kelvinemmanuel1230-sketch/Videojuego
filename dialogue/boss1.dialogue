@@ -1,0 +1,15 @@
+~ boss1_encuentro
+Entre los restos de cableado, algo se pone de pie.
+Narrador: El virus ha construido un guardián con el metal del collar.
+Scarf: Ese brillo... es igual al mío, pero retorcido.
+Scarf: No viene a hablar. Viene a impedir que siga adelante.
+Narrador: Metal Scarf se abalanza.
+=> END
+
+~ boss1_derrota
+Metal Scarf cae y su armadura se apaga.
+Narrador: El collar de Scarf reacciona. Un código CSS acaba de aparecer.
+Scarf: Así que esto era lo que guardaba el virus...
+Scarf: Si lo inserto, tal vez el mundo recupere su color.
+Narrador: Pulsa E para abrir el collar e insertar el código CSS.
+=> END
